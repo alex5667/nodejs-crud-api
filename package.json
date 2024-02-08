@@ -7,8 +7,7 @@
   "scripts": {
     "start": "nodemon ./src/app.ts",
     "test": "vitest",
-    "coverage": "vitest run --coverage",
-    "dev": "npm-run-all --parallel start test"
+    "coverage": "vitest run --coverage"
   },
   "keywords": [],
   "author": "",
@@ -23,11 +22,11 @@
     "nodemon": "^3.0.3",
     "prettier": "^3.2.5",
     "supertest": "^6.3.4",
+    "uuid": "^9.0.1",
     "vitest": "^1.2.2"
   },
   "devDependencies": {
     "@types/supertest": "^6.0.2",
-    "npm-run-all": "^4.1.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
