@@ -1,5 +1,5 @@
 import { IncomingMessage, ServerResponse } from "http";
-
+import { User } from "../types/types";
 import { version } from "uuid";
 import { validate } from "uuid";
 export const sendError = async (
@@ -42,4 +42,23 @@ export function validateUserIdAndSendError(
   res.writeHead(statusCode);
   res.end("User Id is not valid");
   return;
+}
+
+export function isUserDataValid(user: unknown): user is User {
+  if (!user || typeof user !== "object") return false;
+
+  const age = (user as User).age;
+  if (!age || typeof age !== "number") return false;
+
+  const username = (user as User).username;
+  if (!username || typeof username !== "string") return false;
+
+  const hobbies = (user as User).hobbies;
+  if (
+    !Array.isArray(hobbies) ||
+    hobbies.some((item) => typeof item !== "string")
+  )
+    return false;
+
+  return true;
 }

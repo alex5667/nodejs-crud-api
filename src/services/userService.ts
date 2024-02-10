@@ -1,5 +1,6 @@
 import { User, UserId } from "../types/types.ts";
 import { v4 as uuidv4 } from "uuid";
+import { isUserDataValid } from "../utils/utils.ts";
 
 const users: Record<UserId, User> = {};
 
@@ -13,8 +14,13 @@ export async function getUser(userId: UserId): Promise<User | undefined> {
 
 export async function createUser(user: User): Promise<User> {
   user.id = uuidv4();
-  users[user.id] = user;
-  return user;
+
+  if (isUserDataValid(user)) {
+    users[user.id] = user;
+    return user;
+  } else {
+    return;
+  }
 }
 
 export async function updateUser(

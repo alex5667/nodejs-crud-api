@@ -42,7 +42,11 @@ export const usersController = async (
       try {
         const user = await parseRequestBody<User>(req);
         const createdUser = await userService.createUser(user);
-        sendJsonResponse(res, createdUser, 201);
+        if (createdUser) {
+          sendJsonResponse(res, createdUser, 201);
+        } else {
+          sendError(res, 400, "Input is not valid");
+        }
       } catch (error) {
         console.error("Error processing POST request:", error);
         sendError(res, 500, "Internal Server Error");
