@@ -1,5 +1,5 @@
 import { User, UserId } from "../types/types.ts";
-import { v4 as uuidv4, validate } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 
 const users: Record<UserId, User> = {};
 
@@ -23,6 +23,7 @@ export async function updateUser(
 ): Promise<User | undefined> {
   if (!users[userId]) {
     throw new Error(`User with Id ${userId} doesn't exist`);
+    // return;
   }
 
   users[userId] = updatedUser;
@@ -30,9 +31,9 @@ export async function updateUser(
 }
 
 export async function deleteUser(userId: UserId): Promise<void> {
-  
   if (!users[userId]) {
     throw new Error(`User with Id ${userId} doesn't exist`);
+    // return
   }
 
   delete users[userId];

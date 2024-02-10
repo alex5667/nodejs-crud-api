@@ -8,7 +8,7 @@ export const sendError = async (
   message: string
 ) => {
   res.writeHead(statusCode, { "Content-Type": "application/json" });
-  res.end(message);
+  res.end(JSON.stringify(message));
 };
 
 export const parseRequestBody = async <T>(
@@ -39,9 +39,7 @@ export function validateUserIdAndSendError(
   statusCode: number = 200,
   userId: string
 ) {
-  if (!validateUuidV4(userId)) {
-    res.writeHead(statusCode);
-    res.end("User Id is not valid");
-    return;
-  }
+  res.writeHead(statusCode);
+  res.end("User Id is not valid");
+  return;
 }

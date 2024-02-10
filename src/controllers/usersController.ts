@@ -1,8 +1,7 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { User } from "../types/types.ts";
-import { sendError, parseRequestBody } from "../utils/utils.ts";
+import { sendError, parseRequestBody, validateUuidV4 } from "../utils/utils.ts";
 import * as userService from "../services/userService.ts";
-import { validateUuidV4 } from "../models/userModels.ts";
 import { sendJsonResponse } from "../utils/utils.ts";
 import { validateUserIdAndSendError } from "../utils/utils.ts";
 
@@ -22,17 +21,20 @@ export const usersController = async (
           sendError(res, 500, "Internal Server Error");
         }
       } else {
-        try {
-          validateUserIdAndSendError(res, 400, userId);
-          const user = await userService.getUser(userId);
-          if (user) {
-            sendJsonResponse(res, user, 200);
-          } else {
-            sendError(res, 404, `User with Id ${userId} doesn't exist`);
+        if (!validateUuidV4(userId)) {
+          sendError(res, 400, "User Id is not valid");
+        } else {
+          try {
+            const user = await userService.getUser(userId);
+            if (user) {
+              sendJsonResponse(res, user, 200);
+            } else {
+              sendError(res, 404, `User with Id ${userId} doesn't exist`);
+            }
+          } catch (error) {
+            console.error("Error processing GET request:", error);
+            sendError(res, 500, "Internal Server Error");
           }
-        } catch (error) {
-          console.error("Error processing GET request:", error);
-          sendError(res, 500, "Internal Server Error");
         }
       }
       break;
@@ -45,47 +47,52 @@ export const usersController = async (
         console.error("Error processing POST request:", error);
         sendError(res, 500, "Internal Server Error");
       }
+
       break;
     case "PUT":
-      validateUserIdAndSendError(res, 400, userId);
-      try {
-        const updatedUser = await parseRequestBody<User>(req);
-        const updatedUserResult = await userService.updateUser(
-          userId,
-          updatedUser
-        );
-        if (updatedUserResult) {
-          sendJsonResponse(res, updatedUserResult, 200);
-        } else {
-          sendError(res, 404, `User with Id ${userId} doesn't exist`);
+      if (!validateUuidV4(userId)) {
+        sendError(res, 400, "User Id is not valid");
+      } else {
+        try {
+          const updatedUser = await parseRequestBody<User>(req);
+          const updatedUserResult = await userService.updateUser(
+            userId,
+            updatedUser
+          );
+          if (updatedUserResult) {
+            sendJsonResponse(res, updatedUserResult, 200);
+          } else {
+            sendError(res, 404, `User with Id ${userId} doesn't exist`);
+          }
+        } catch (error) {
+          console.error("Error processing PUT request:", error);
+          sendError(res, 500, "Internal Server Error");
         }
-      } catch (error) {
-        console.error("Error processing PUT request:", error);
-        sendError(res, 500, "Internal Server Error");
       }
+
       break;
     case "DELETE":
-      try {
-        if(!userId){
-          sendError(res, 404, `User with Id ${userId} doesn't exist`);
-        }
-        validateUserIdAndSendError(res, 400, userId);
-
-        const user = await userService.getUser(userId);
-        if (!user) {
-          res.writeHead(404);
-          res.end(`User with Id ${userId} doesn't exist`);
-          return;
-        }
-
-        await userService.deleteUser(userId);
-        res.writeHead(204);
-        res.end();
+      if (!userId || !validateUuidV4(userId)) {
+        sendError(res, 400, "User Id is not valid");
         return;
-      } catch (error) {
-        console.error("Error processing DELETE request:", error);
-        sendError(res, 500, "Internal Server Error");
+      } else {
+        try {
+          const user = await userService.getUser(userId);
+          if (!user) {
+            res.writeHead(404);
+            res.end(`User with Id ${userId} doesn't exist`);
+            return;
+          }
+
+          await userService.deleteUser(userId);
+          res.writeHead(204);
+          res.end();
+        } catch (error) {
+          console.error("Error processing DELETE request:", error);
+          sendError(res, 500, "Internal Server Error");
+        }
       }
+
       break;
     default:
       sendError(res, 405, "Method Not Allowed");
