@@ -63,10 +63,13 @@ export const usersController = async (
             userId,
             updatedUser
           );
-          if (updatedUserResult) {
+          if (typeof updatedUserResult === "object") {
             sendJsonResponse(res, updatedUserResult, 200);
-          } else {
+          }
+          if (updatedUserResult === "doesn't exist") {
             sendError(res, 404, `User with Id ${userId} doesn't exist`);
+          } else {
+            sendError(res, 400, "Input is not valid");
           }
         } catch (error) {
           console.error("Error processing PUT request:", error);

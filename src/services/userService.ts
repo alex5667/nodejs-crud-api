@@ -26,14 +26,17 @@ export async function createUser(user: User): Promise<User> {
 export async function updateUser(
   userId: UserId,
   updatedUser: User
-): Promise<User | undefined> {
+): Promise<User | undefined| string> {
   if (!users[userId]) {
-    throw new Error(`User with Id ${userId} doesn't exist`);
-    // return;
+    // throw new Error(`User with Id ${userId} doesn't exist`);
+    return "doesn't exist";
   }
-
-  users[userId] = updatedUser;
-  return updatedUser;
+  if (isUserDataValid(updatedUser)) {
+    users[userId] = updatedUser;
+    return updatedUser;
+  } else {
+    return;
+  }
 }
 
 export async function deleteUser(userId: UserId): Promise<void> {

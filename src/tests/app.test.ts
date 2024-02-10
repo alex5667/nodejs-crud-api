@@ -80,4 +80,56 @@ describe("END_POINTS users", () => {
       .expect(400);
     expect(response.text).toEqual("\"User Id is not valid\"");
   });
+  it(`should not edit user, if  have mismatched type`, async () => {
+    const newUser: User = {
+      username: "Test user",
+      age: 42,
+      hobbies: ["cooking", "painting", "hiking"],
+    };
+    const resAddNew = await req
+      .post(`${END_POINTS.users}`)
+      .send(newUser)
+      .expect(201);
+    expect(resAddNew.body.id).toBeTruthy();
+    newUser.id = resAddNew.body.id;
+
+    let partialUser: Partial<User> = {
+      username: "Test user",
+      age: 42,
+    };
+    await req.put(`${END_POINTS.users}/${newUser.id}`).send(partialUser).expect(400);
+
+    partialUser = {
+      username: "Test user",
+      hobbies: ["cooking", "painting", "hiking"],
+    };
+    await req.put(`${END_POINTS.users}/${newUser.id}`).send(partialUser).expect(400);
+
+    partialUser = {
+      username: "Test user",
+      age: 42,
+    };
+    await req.put(`${END_POINTS.users}/${newUser.id}`).send(partialUser).expect(400);
+
+    partialUser = {
+      username: "Test user",
+      age: 42,
+      hobbies: [null, "painting", "hiking"] as string[],
+    };
+    await req.put(`${END_POINTS.users}/${newUser.id}`).send(partialUser).expect(400);
+
+    partialUser = {
+      username: null as unknown as string,
+      age: 42,
+      hobbies: ["cooking", "painting", "hiking"],
+    };
+    await req.put(`${END_POINTS.users}/${newUser.id}`).send(partialUser).expect(400);
+
+    partialUser = {
+      username: "Test user",
+      age: null as unknown as number,
+      hobbies: ["cooking", "painting", "hiking"],
+    };
+    await req.put(`${END_POINTS.users}/${newUser.id}`).send(partialUser).expect(400);
+  });
 });
