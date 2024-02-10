@@ -5,7 +5,7 @@
     "esModuleInterop": true,
     "target": "esnext",
     "sourceMap": true,
-    "outDir": "dist",
+    // "outDir": "dist",
     "noImplicitAny": true,
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
