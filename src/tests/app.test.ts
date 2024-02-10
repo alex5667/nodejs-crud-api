@@ -48,17 +48,36 @@ describe("END_POINTS users", () => {
       .send(updatedUser)
       .expect(200);
     expect(responsePut.body).toStrictEqual(updatedUser);
+
+    await req.delete(`${END_POINTS.users}/${newUser.id}`).expect(204);
+
+    await req.get(`${END_POINTS.users}/${newUser.id}`).expect(404);
   });
 
   it(`A new object is created by a POST api/users request`, async () => {
     const response = await req
       .post(`${END_POINTS.users}`)
       .send({
-        username: "Test user",
+        username: "Test",
         age: 58,
         hobbies: ["looking"],
       } as User)
       .expect(201);
     expect(response.body.id).toBeTruthy();
+  });
+
+  it(`GET, PUT :userId respose with 400 when userId is not uuid`, async () => {
+    let response = await req
+      .get(`${END_POINTS.users}/not-valid-uuid`)
+      .expect(400);
+    expect(response.text).toBe("User Id is not valid");
+
+    response = await req.put(`${END_POINTS.users}/not-valid-uuid`).expect(400);
+    expect(response.text).toBe("User Id is not valid");
+
+    response = await req
+      .delete(`${END_POINTS.users}/not-valid-uuid`)
+      .expect(400);
+    expect(response.text).toBe("User Id is not valid");
   });
 });
