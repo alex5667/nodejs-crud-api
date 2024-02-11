@@ -23,7 +23,7 @@ export async function setupHttpServer() {
   return server;
 }
 
-export async function launchServer(port: number = 4000) {
+export async function launchServer(port: number = 4000,) {
   const server = await setupHttpServer();
   server.listen(port);
   await once(server, "listening");

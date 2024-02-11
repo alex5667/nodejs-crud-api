@@ -11,7 +11,8 @@
     "allowImportingTsExtensions": true,
     "emitDeclarationOnly": true,
     "declaration": true,
-    "composite": true
+    "composite": true,
+    "skipLibCheck": true
   },
   "lib": ["es2020"],
   "include": ["**/*", "src"],

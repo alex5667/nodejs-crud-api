@@ -3,7 +3,8 @@ import { User } from "../types/types.ts";
 import { sendError, parseRequestBody, validateUuidV4 } from "../utils/utils.ts";
 import * as userService from "../services/userService.ts";
 import { sendJsonResponse } from "../utils/utils.ts";
-import { validateUserIdAndSendError } from "../utils/utils.ts";
+
+
 
 export const usersController = async (
   req: IncomingMessage,

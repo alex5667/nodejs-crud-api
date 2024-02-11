@@ -5,7 +5,7 @@ const config = {
   mode: "production",
 
   entry: {
-    index: "./src/app.ts",
+    index: "./src/app.cluster.ts",
     // dataserver: './src/app/dataserver.ts'
   },
   module: {

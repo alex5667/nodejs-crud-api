@@ -4,12 +4,13 @@
   "description": "",
   "main": "app.js",
   "type": "module",
-  
   "scripts": {
     "start": "nodemon ./src/app.ts",
     "test": "vitest",
     "start:dev": "npm run start",
+    "start:dev:multi": "nodemon ./src/app.cluster.ts",
     "start:prod": "npm run build && node dist/index.js",
+    "start:multi": "npm run build && node dist/index.js",
     "build": "webpack --mode=production",
     "coverage": "vitest run --coverage"
   },
