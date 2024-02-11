@@ -11,10 +11,13 @@ const users: Record<UserId, User> = {
   // ],}
 };
 
-export const db = { users };
+export let db = { users };
 
 export type Database = typeof db;
-export type GetDb = () => Database;
+export const setDatabase = (newDb: Database): Database => {
+  db = newDb;
+  return db;
+};
 
 export async function getUsers(): Promise<User[]> {
   return Object.values(db.users);
@@ -41,7 +44,7 @@ export async function updateUser(
   userId: UserId,
   updatedUser: User
 ): Promise<User | undefined | string> {
-  if (!users[userId]) {
+  if (!db.users[userId]) {
     // throw new Error(`User with Id ${userId} doesn't exist`);
     return "doesn't exist";
   }

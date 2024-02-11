@@ -3,9 +3,9 @@ import { cpus } from "os";
 import { pid } from "process";
 
 import { launchServer } from "./server.ts";
+import { setDatabase } from "./services/userService.ts";
 
 import "dotenv/config";
-import { Database, db as initialDb } from "./services/userService.ts";
 const port = Number(process.env.PORT);
 
 if (cluster.isPrimary) {
@@ -17,12 +17,10 @@ if (cluster.isPrimary) {
     worker.on("error", (err) => console.log("Worker error", err));
   }
 } else {
-  let db: Database = initialDb;
-
   process.on("message", async function (msg: any) {
     try {
       if (msg.task && msg.task === "sync") {
-        db = msg.data;
+        setDatabase(msg.data);
       }
     } catch (error) {
       console.log("Cluster error", error);
@@ -30,8 +28,12 @@ if (cluster.isPrimary) {
   });
 
   const id = cluster.worker?.id;
+  const port = Number(process.env.PORT) + cluster.worker.id - 1;
+
   await launchServer(port);
-  console.log(`Worker: ${id}, pid: ${pid}, Server started: http://localhost:${port}`);
+  console.log(
+    `Worker: ${id}, pid: ${pid}, Server started: http://localhost:${port}`
+  );
 }
 
 function syncData(msg: any) {

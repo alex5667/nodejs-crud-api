@@ -4,8 +4,6 @@ import { sendError, parseRequestBody, validateUuidV4 } from "../utils/utils.ts";
 import * as userService from "../services/userService.ts";
 import { sendJsonResponse } from "../utils/utils.ts";
 
-
-
 export const usersController = async (
   req: IncomingMessage,
   res: ServerResponse
@@ -66,8 +64,7 @@ export const usersController = async (
           );
           if (typeof updatedUserResult === "object") {
             sendJsonResponse(res, updatedUserResult, 200);
-          }
-          if (updatedUserResult === "doesn't exist") {
+          } else if (updatedUserResult === "doesn't exist") {
             sendError(res, 404, `User with Id ${userId} doesn't exist`);
           } else {
             sendError(res, 400, "Input is not valid");
