@@ -1,8 +1,5 @@
-import { assert, describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import request from "supertest";
-import http from "http";
-import { END_POINTS } from "../constants/constants.ts";
-import { User } from "../types/types.ts";
 
 const req = request("http://localhost:4000");
 

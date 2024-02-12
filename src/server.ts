@@ -2,10 +2,14 @@ import { once } from "events";
 import http from "http";
 import { END_POINTS } from "./constants/constants.ts";
 import { usersController } from "./controllers/usersController.ts";
+import { pid } from "process";
+
 
 export async function setupHttpServer() {
   const server = http.createServer(async (req, res) => {
     console.log("req", req.url, req.method);
+    res.setHeader("process-id", pid);
+
     if (!req.url?.startsWith(END_POINTS.users)) {
       res.writeHead(404);
       res.end("Endpoint not found");

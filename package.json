@@ -7,10 +7,10 @@
   "scripts": {
     "start": "nodemon ./src/app.ts",
     "test": "vitest",
+    "test:multi": "cross-env TEST_CLUSTER=1 vitest",
     "start:dev": "npm run start",
-    "start:dev:multi": "nodemon ./src/app.cluster.ts",
+    "start:multi": "nodemon ./src/app.cluster.ts",
     "start:prod": "npm run build && node dist/index.js",
-    "start:multi": "npm run build && node dist/index.js",
     "build": "webpack --mode=production",
     "coverage": "vitest run --coverage"
   },
