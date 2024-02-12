@@ -59,5 +59,9 @@ Install with `npm install`
 
 #### Commands
 
-* `npm run test` runs all tests, no need to run server, it will be imported in test and run in single-mode.
-* `npm run test:multi`   multi-mode
+* `npm run start:dev`# console 1
+`npm run test` # console 2     runs all tests, no need to run server, it will be imported in test and run in single-mode.
+
+
+* `npm run start:multi`# console 1
+* `npm run test:multi` # console 2  multi-mode
