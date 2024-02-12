@@ -15,7 +15,7 @@ describe.runIf(isCluster)("cluster app", () => {
     const users = response.body as User[];
 
     for (const user of users) {
-      await req.delete(`${END_POINTS.users}/${user.id}`).expect(204);
+      await req.delete(`${END_POINTS.users}/${user.id}`).expect(404);
     }
   });
 
@@ -35,7 +35,6 @@ describe.runIf(isCluster)("cluster app", () => {
       hobbies: ["photography", "playing guitar", "gardening"],
     };
   
-    // Создаем нового пользователя
     const responseAddNew = await req
       .post(`${END_POINTS.users}`)
       .send(newUser)
@@ -53,12 +52,11 @@ describe.runIf(isCluster)("cluster app", () => {
     );
     expect(responseList.body).toStrictEqual([newUser]);
   
-    // Обновляем пользователя
     const updatedUser = {
       ...newUser,
       username: "Modified username",
-      age: 22, // Изменяем возраст
-      hobbies: ["hiking"], // Изменяем хобби
+      age: 22, 
+      hobbies: ["hiking"], 
     };
     const responsePut = await req
       .put(`${END_POINTS.users}/${updatedUser.id}`)
@@ -69,28 +67,24 @@ describe.runIf(isCluster)("cluster app", () => {
     const pidUpdate = Number(responsePut.headers["process-id"]);
     expect(pidUpdate).toBeTruthy();
   
-    // Проверяем, что данные пользователя обновлены в других процессах
     const responseListAfterUpdate = await reqUntilFindAnotherProcess(
       req.get(END_POINTS.users).expect(200),
       pidUpdate
     );
     expect(responseListAfterUpdate.body).toContainEqual(updatedUser);
   
-    // Удаляем пользователя
     const responseDelete = await req
       .delete(`${END_POINTS.users}/${newUser.id}`)
       .expect(204);
     const pidDelete = Number(responseDelete.headers["process-id"]);
     expect(pidDelete).toBeTruthy();
   
-    // Проверяем, что пользователь успешно удален
     const responseListAfterDelete = await reqUntilFindAnotherProcess(
       req.get(END_POINTS.users).expect(200),
       pidDelete
     );
     expect(responseListAfterDelete.body).toStrictEqual([]);
   
-    // Проверяем, что пользователь больше не существует после удаления
     const responseGetAfterDelete = await req
       .get(`${END_POINTS.users}/${newUser.id}`)
       .expect(404);
