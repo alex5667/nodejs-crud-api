@@ -5,13 +5,14 @@
     "esModuleInterop": true,
     "target": "esnext",
     "sourceMap": true,
-    "outDir": "dist",
+    // "outDir": "dist",
     "noImplicitAny": true,
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "emitDeclarationOnly": true,
     "declaration": true,
-    "composite": true
+    "composite": true,
+    "skipLibCheck": true
   },
   "lib": ["es2020"],
   "include": ["**/*", "src"],

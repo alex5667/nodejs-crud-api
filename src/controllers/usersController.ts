@@ -1,87 +1,106 @@
 import { IncomingMessage, ServerResponse } from "http";
-import { User, UserId } from "../types/types.ts";
-import { v4 as uuidv4, validate } from "uuid";
-
-const users: Record<UserId, User> = {};
+import { User } from "../types/types.ts";
+import { sendError, parseRequestBody, validateUuidV4 } from "../utils/utils.ts";
+import * as userService from "../services/userService.ts";
+import { sendJsonResponse } from "../utils/utils.ts";
 
 export const usersController = async (
   req: IncomingMessage,
   res: ServerResponse
 ) => {
   const userId = req.url?.split("/").pop();
-  if (req.method === "GET") {
-    if (userId === "users") {
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(users));
-      return;
-    }
+  switch (req.method) {
+    case "GET":
+      if (userId === "users") {
+        try {
+          const users = await userService.getUsers();
+          sendJsonResponse(res, users, 200);
+        } catch (error) {
+          console.error("Error processing GET request:", error);
+          sendError(res, 500, "Internal Server Error");
+        }
+      } else {
+        if (!validateUuidV4(userId)) {
+          sendError(res, 400, "User Id is not valid");
+        } else {
+          try {
+            const user = await userService.getUser(userId);
+            if (user) {
+              sendJsonResponse(res, user, 200);
+            } else {
+              sendError(res, 404, `User with Id ${userId} doesn't exist`);
+            }
+          } catch (error) {
+            console.error("Error processing GET request:", error);
+            sendError(res, 500, "Internal Server Error");
+          }
+        }
+      }
+      break;
+    case "POST":
+      try {
+        const user = await parseRequestBody<User>(req);
+        const createdUser = await userService.createUser(user);
+        if (createdUser) {
+          sendJsonResponse(res, createdUser, 201);
+        } else {
+          sendError(res, 400, "Input is not valid");
+        }
+      } catch (error) {
+        console.error("Error processing POST request:", error);
+        sendError(res, 500, "Internal Server Error");
+      }
 
-    if (!validate(userId)) {
-      res.writeHead(400);
-      res.end("UserId is not invalid");
-      return;
-    }
+      break;
+    case "PUT":
+      if (!validateUuidV4(userId)) {
+        sendError(res, 400, "User Id is not valid");
+      } else {
+        try {
+          const updatedUser = await parseRequestBody<User>(req);
+          const updatedUserResult = await userService.updateUser(
+            userId,
+            updatedUser
+          );
+          if (typeof updatedUserResult === "object") {
+            sendJsonResponse(res, updatedUserResult, 200);
+          } else if (updatedUserResult === "doesn't exist") {
+            sendError(res, 404, `User with Id ${userId} doesn't exist`);
+          } else {
+            sendError(res, 400, "Input is not valid");
+          }
+        } catch (error) {
+          console.error("Error processing PUT request:", error);
+          sendError(res, 500, "Internal Server Error");
+        }
+      }
 
-    const user = users[userId];
-    if (!user) {
-      res.writeHead(404);
-      res.end(`User with Id ${userId} doesn't exist`);
-      return;
-    }
+      break;
+    case "DELETE":
+      if (!userId || !validateUuidV4(userId)) {
+        sendError(res, 400, "User Id is not valid");
+        return;
+      } else {
+        try {
+          const user = await userService.getUser(userId);
+          if (!user) {
+            res.writeHead(404);
+            res.end(`User with Id ${userId} doesn't exist`);
+            return;
+          }
 
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(user));
-    return;
+          await userService.deleteUser(userId);
+          res.writeHead(204);
+          res.end();
+        } catch (error) {
+          console.error("Error processing DELETE request:", error);
+          sendError(res, 500, "Internal Server Error");
+        }
+      }
+
+      break;
+    default:
+      sendError(res, 405, "Method Not Allowed");
+      break;
   }
-
-  if (req.method === "POST") {
-    try {
-      const user = await parseRequestBody<User>(req);
-      user.id = uuidv4();
-
-      users[user.id] = user;
-      res.writeHead(201, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(user));
-    } catch (error) {
-      console.error("Error processing POST request:", error);
-      res.writeHead(500, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Internal Server Error" }));
-    }
-    return;
-  }
-
-  if (req.method === "PUT") {
-    if (!userId || !validate(userId)) {
-      res.writeHead(400);
-      res.end("UserId is not invalid");
-      return;
-    }
-
-    const user = users[userId];
-    if (!user) {
-      res.writeHead(404);
-      res.end(`User with Id ${userId} doesn't exist`);
-      return;
-    }
-
-    const userUpdated = await parseRequestBody<User>(req);
-    users[userId] = userUpdated;
-
-    res.writeHead(200, {
-      "Content-Type": "application/json",
-    });
-    res.end(JSON.stringify(userUpdated));
-    return;
-  }
-
-  res.writeHead(405, { "Content-Type": "application/json" });
-  res.end(JSON.stringify({ error: "Method Not Allowed" }));
 };
-
-async function parseRequestBody<T>(req: IncomingMessage): Promise<Awaited<T>> {
-  const buffers = [];
-  for await (const chunk of req) {
-    buffers.push(chunk);
-  }
-  return JSON.parse(Buffer.concat(buffers).toString());
-}
